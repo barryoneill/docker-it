@@ -8,7 +8,7 @@ trait CirceSupport {
   def decodeOrThrow[T](value: String)(implicit decoder: io.circe.Decoder[T]): T =
 
     decode[T](value) match {
-      case Right(t: T) => t
+      case Right(t) => t
       case Left(e) => throw new RuntimeException(s"""Couldn't parse "$value"""", e)
     }
 
