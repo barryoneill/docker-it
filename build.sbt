@@ -1,6 +1,8 @@
 val V = new {
   val awsSdk = "1.11.313"
   val scalatest = "3.0.5"
+  val dockerTestKit = "0.9.5"
+  val circe = "0.9.3"
 }
 
 version := "0.9.0"
@@ -18,16 +20,16 @@ val commonsSettings = Seq(
     "-language:implicitConversions"
   ),
   libraryDependencies ++= Seq(
-    "com.amazonaws" % "aws-java-sdk-kinesis"    % V.awsSdk,
-    "com.amazonaws" % "aws-java-sdk-cloudwatch" % V.awsSdk,
-    "org.scalatest" %% "scalatest"             % "3.0.4",
-    "com.whisk" %% "docker-testkit-scalatest" % "0.9.5",
-    "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.5",
-    "cloud.localstack" % "localstack-utils" % "0.1.13",
-    "com.twitter"   %% "finagle-redis" % "18.4.0",
-    "io.circe"      %% "circe-core"            % "0.9.3",
-    "io.circe"      %% "circe-generic"         % "0.9.3",
-    "io.circe"      %% "circe-parser"          % "0.9.3",
+    "com.amazonaws"     % "aws-java-sdk-kinesis"        % V.awsSdk,
+    "com.amazonaws"     % "aws-java-sdk-cloudwatch"     % V.awsSdk,
+    "org.scalatest"    %% "scalatest"                   % "3.0.4",
+    "com.whisk"        %% "docker-testkit-scalatest"    % V.dockerTestKit,
+    "com.whisk"        %% "docker-testkit-impl-spotify" % V.dockerTestKit,
+    "cloud.localstack"  % "localstack-utils"            % "0.1.13",
+    "com.twitter"      %% "finagle-redis"               % "18.4.0",
+    "io.circe"         %% "circe-core"                  % V.circe,
+    "io.circe"         %% "circe-generic"               % V.circe,
+    "io.circe"         %% "circe-parser"                % V.circe
   )
 )
 
