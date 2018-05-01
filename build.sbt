@@ -24,7 +24,10 @@ val commonsSettings = Seq(
     "com.whisk" %% "docker-testkit-scalatest" % "0.9.5",
     "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.5",
     "cloud.localstack" % "localstack-utils" % "0.1.13",
-    "com.twitter"   %% "finagle-redis"    % "18.4.0"
+    "com.twitter"   %% "finagle-redis" % "18.4.0",
+    "io.circe"      %% "circe-core"            % "0.9.3",
+    "io.circe"      %% "circe-generic"         % "0.9.3",
+    "io.circe"      %% "circe-parser"          % "0.9.3",
   )
 )
 
