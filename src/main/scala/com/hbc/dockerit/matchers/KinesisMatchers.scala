@@ -4,7 +4,6 @@ import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.kinesis.{AmazonKinesis, AmazonKinesisClientBuilder}
 import com.hbc.dockerit.containers.LocalstackContainer
 import com.hbc.dockerit.util.{CirceSupport, KinesisUtil}
-import com.twitter.finagle.Redis.Client
 import org.scalatest.Matchers
 import org.scalatest.matchers.{MatchResult, Matcher}
 
@@ -20,35 +19,12 @@ trait KinesisMatchers extends Matchers with CirceSupport {
                                 (implicit decoder: io.circe.Decoder[T],
                                  encoder: io.circe.Encoder[T]) = Matcher { (kinesis: AmazonKinesis) =>
 
-      val events = KinesisUtil(kinesis).getRecords[T](streamName)
+      val actualEvents = KinesisUtil(kinesis).getRecords[T](streamName)
 
-      println(events)
-
-      MatchResult(true, "", "")
+      MatchResult(actualEvents.size == expectedEvents.size && actualEvents.toSet == expectedEvents.toSet,
+        s"""Expected events $expectedEvents but got $actualEvents""",
+        s"""Found only $actualEvents"""
+      )
   }
-
-  //
-  //  def haveEncodedValueOnGet[T](key: String, expectedObj: T)
-  //                              (implicit decoder: io.circe.Decoder[T],
-  //                               encoder: io.circe.Encoder[T]) = Matcher { (c: Client) =>
-  //
-  //    val expectedJSON = encode[T](expectedObj)
-  //
-  //    RedisUtil(c).get(key) match {
-  //
-  //      case Some(actualJSON) =>
-  //
-  //        val actualObj = decodeOrThrow[T](actualJSON)
-  //
-  //        MatchResult(
-  //          actualObj == expectedObj,
-  //          s"""Expected value "$expectedJSON" but got "$actualJSON" for key $key""",
-  //          s"""Values match: $expectedObj for key $key""")
-  //
-  //
-  //      case None => MatchResult(matches = false, s"""No value found for $key""", s"""No value found for $key""")
-  //
-  //    }
-  //  }
 
 }

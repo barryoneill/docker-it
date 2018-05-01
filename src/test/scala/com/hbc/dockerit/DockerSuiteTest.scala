@@ -32,7 +32,9 @@ class DockerSuiteTest extends WordSpec with DockerSuite with BeforeAndAfterAll
     redisUtil.mSet(RedisTestData.AnimalNoiseMap)
     redisUtil.set(RedisTestData.AccountKey, RedisTestData.AccountVal)
 
-
+    val kinesisUtil = KinesisUtil(kinesis)
+    kinesisUtil.createStream(KinesisTestData.StreamName)
+    kinesisUtil.putRecords[BankAccount](KinesisTestData.StreamName, KinesisTestData.BankAccounts, r => r.accountNumber)
   }
 
   "RedisContainer" should {
@@ -70,10 +72,6 @@ class DockerSuiteTest extends WordSpec with DockerSuite with BeforeAndAfterAll
     "have kinesis matchers" that compare {
 
       "havePendingEvents" in {
-
-        val kinesisUtil = KinesisUtil(kinesis)
-        kinesisUtil.createStream(KinesisTestData.StreamName)
-        kinesisUtil.putRecords[BankAccount](KinesisTestData.StreamName, KinesisTestData.BankAccounts, r => r.accountNumber)
 
         kinesis should havePendingEvents(KinesisTestData.StreamName, KinesisTestData.BankAccounts)
 
