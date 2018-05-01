@@ -1,24 +1,26 @@
-package com.hbc.dockerit
+package com.hbc.dockerit.matchers
 
 import java.util.Date
 
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.cloudwatch.model.{Datapoint, GetMetricStatisticsRequest}
 import com.amazonaws.services.cloudwatch.{AmazonCloudWatch, AmazonCloudWatchClientBuilder}
+import com.hbc.dockerit.containers.LocalstackContainer
+import org.scalatest.Matchers
 
 import scala.collection.JavaConverters._
 
-trait CloudWatchSpec {
-  dockerSupport: DockerSupport =>
+trait CloudwatchMatchers extends Matchers {
+  container: LocalstackContainer =>
 
-  def buildCloudWatchClient: AmazonCloudWatch = AmazonCloudWatchClientBuilder.standard()
-    .withCredentials(dockerSupport.localstackAWSCredProvider)
-    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(s"http://localhost:$getMappedCloudWatchPort/", "us-east-1"))
+  lazy val cloudwatch: AmazonCloudWatch = AmazonCloudWatchClientBuilder.standard()
+    .withCredentials(container.dummyAWSCreds)
+    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(s"http://localhost:$portCloudwatch/", "us-east-1"))
     .build()
 
   def cloudWatchListMetrics(namespace: String, name: String): Seq[Datapoint] = {
 
-    buildCloudWatchClient.getMetricStatistics(new GetMetricStatisticsRequest()
+    cloudwatch.getMetricStatistics(new GetMetricStatisticsRequest()
       .withNamespace(namespace)
       .withMetricName(name)
       .withPeriod(60)

@@ -3,6 +3,8 @@ val V = new {
   val scalatest = "3.0.5"
 }
 
+version := "0.9.0"
+
 val commonsSettings = Seq(
   organization := "com.hbc",
   scalaVersion := "2.12.6",
