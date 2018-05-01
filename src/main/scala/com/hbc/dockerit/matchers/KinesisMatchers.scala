@@ -2,13 +2,13 @@ package com.hbc.dockerit.matchers
 
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.kinesis.{AmazonKinesis, AmazonKinesisClientBuilder}
-import com.hbc.dockerit.containers.LocalstackContainer
+import com.hbc.dockerit.containers.LocalStackContainer
 import com.hbc.dockerit.util.{CirceSupport, KinesisUtil}
 import org.scalatest.Matchers
 import org.scalatest.matchers.{MatchResult, Matcher}
 
 trait KinesisMatchers extends Matchers with CirceSupport {
-  container: LocalstackContainer =>
+  container: LocalStackContainer =>
 
   lazy val kinesis: AmazonKinesis = AmazonKinesisClientBuilder.standard()
     .withCredentials(container.dummyAWSCreds)
