@@ -6,7 +6,7 @@ import com.whisk.docker.{DockerContainer, DockerKit, DockerReadyChecker}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.ScalaFutures
 
-trait LocalstackContainer extends DockerKit with ScalaFutures {
+trait LocalStackContainer extends DockerKit with ScalaFutures {
 
   val PORT_WEB_UI = 8080
   val PORT_KINESIS = 4568
