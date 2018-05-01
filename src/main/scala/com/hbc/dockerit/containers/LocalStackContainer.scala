@@ -1,7 +1,6 @@
 package com.hbc.dockerit.containers
 
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
-import com.hbc.dockerit.util.EnvWriter
 import com.whisk.docker.{DockerContainer, DockerKit, DockerReadyChecker}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.ScalaFutures
@@ -21,7 +20,7 @@ trait LocalStackContainer extends DockerKit with ScalaFutures {
 
   // localstack uses kinesalite, which doesn't support CBOR (which the AWS SDK defaults to using)
   // https://github.com/mhart/kinesalite#cbor-protocol-issues-with-the-java-sdk
-  EnvWriter.setEnvVar("AWS_CBOR_DISABLE", "true")
+  System.setProperty("com.amazonaws.sdk.disableCbor", "1")
 
   private[this] def getMappedPort(port: Int): Int = {
     container.getPorts().futureValue
