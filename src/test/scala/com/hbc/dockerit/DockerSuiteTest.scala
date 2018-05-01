@@ -1,15 +1,14 @@
 package com.hbc.dockerit
 
-import com.hbc.dockerit.containers.RedisContainer
-import com.hbc.dockerit.matchers.RedisMatchers
+import com.hbc.dockerit.containers.{LocalstackContainer, RedisContainer}
+import com.hbc.dockerit.matchers.{CloudwatchMatchers, KinesisMatchers, RedisMatchers}
 import com.hbc.dockerit.models.BankAccount
 import com.hbc.dockerit.util.RedisUtil
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
 class DockerSuiteTest extends WordSpec with DockerSuite with BeforeAndAfterAll
   with RedisContainer with RedisMatchers
-  //  with LocalstackContainer with KinesisMatchers with CloudwatchMatchers {
-{
+  with LocalstackContainer with KinesisMatchers with CloudwatchMatchers {
 
   def compare: AfterWord = afterWord("compare")
 
@@ -24,7 +23,7 @@ class DockerSuiteTest extends WordSpec with DockerSuite with BeforeAndAfterAll
 
   "RedisContainer" should {
 
-    "have matchers" that compare {
+    "have redis matchers" that compare {
 
       "haveOnlyKeys" in {
         redis should haveOnlyKeys("cat", "dog", "duck", "human", "savingsacc")
@@ -53,21 +52,27 @@ class DockerSuiteTest extends WordSpec with DockerSuite with BeforeAndAfterAll
 
   "LocalstackContainer" should {
 
-    "have working kinesis assertions" in {
+    "have kinesis matchers" that compare {
 
-      // TODO:
-      3 shouldBe 3
+      "havePendingEvents" in {
+
+        // TODO:
+        3 shouldBe 3
+
+      }
 
     }
 
-    "have working cloudwatch assertions" in {
+    "have cloudwatch matchers" that compare {
 
-      // TODO
-      3 shouldBe 3
+      "NOTHING (TODO)" in {
+
+        // TODO: coming soon, eventually, at some point
+        3 shouldBe 3
+      }
 
     }
 
   }
-
 
 }
