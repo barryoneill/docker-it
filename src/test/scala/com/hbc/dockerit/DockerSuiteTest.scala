@@ -1,21 +1,40 @@
 package com.hbc.dockerit
 
-import com.hbc.dockerit.containers.{LocalstackContainer, RedisContainer}
-import com.hbc.dockerit.matchers.{CloudwatchMatchers, KinesisMatchers, RedisMatchers}
+import com.hbc.dockerit.containers.RedisContainer
+import com.hbc.dockerit.matchers.RedisMatchers
 import com.hbc.dockerit.util.RedisUtil
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
-class DockerSuiteTest extends WordSpec with Matchers with DockerSuite
-                        with RedisContainer with RedisMatchers
-                        with LocalstackContainer with KinesisMatchers with CloudwatchMatchers {
+class DockerSuiteTest extends WordSpec with DockerSuite with BeforeAndAfterAll
+  with RedisContainer with RedisMatchers
+  //  with LocalstackContainer with KinesisMatchers with CloudwatchMatchers {
+{
+
+  def compare: AfterWord = afterWord("compare")
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+
+    val redisUtil = RedisUtil(redis)
+    redisUtil.resetCache()
+    redisUtil.mSet(Map("cat" -> "miaow", "dog" -> "woof", "duck" -> "quack", "cow" -> "moo", "human" -> "talk"))
+  }
 
   "RedisContainer" should {
 
-    "have working redis assertions" in {
+    "have matchers" that compare {
 
-      RedisUtil(redis).mSet(Map("cat" -> "miaow", "dog" -> "woof"))
+      "haveOnlyKeys" in {
+        redis should haveOnlyKeys("cat", "dog", "duck", "cow", "human")
+      }
 
-      redis should haveKeys(Seq("cat","dog"))
+      "haveKeys" in {
+        redis should haveKeys("human", "dog")
+      }
+
+      "haveKeysMatching" in {
+        redis should haveKeysMatching("*o*")
+      }
 
     }
 
@@ -38,7 +57,6 @@ class DockerSuiteTest extends WordSpec with Matchers with DockerSuite
     }
 
   }
-
 
 
 }
