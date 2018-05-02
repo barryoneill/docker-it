@@ -5,8 +5,6 @@ val V = new {
   val circe = "0.9.3"
 }
 
-version := "0.9.0"
-
 val commonsSettings = Seq(
   organization := "com.hbc",
   scalaVersion := "2.12.6",
