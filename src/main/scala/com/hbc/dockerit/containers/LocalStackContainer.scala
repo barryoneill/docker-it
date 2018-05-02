@@ -1,11 +1,13 @@
 package com.hbc.dockerit.containers
 
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import com.hbc.dockerit.matchers.{CloudWatchMatchers, KinesisMatchers}
 import com.whisk.docker.{DockerContainer, DockerKit, DockerReadyChecker}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.ScalaFutures
 
-trait LocalStackContainer extends DockerKit with ScalaFutures {
+trait LocalStackContainer extends DockerKit with ScalaFutures
+                    with KinesisMatchers with CloudWatchMatchers {
 
   val PORT_WEB_UI = 8080
   val PORT_KINESIS = 4568

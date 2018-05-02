@@ -1,10 +1,11 @@
 package com.hbc.dockerit.containers
 
+import com.hbc.dockerit.matchers.RedisMatchers
 import com.whisk.docker.{DockerContainer, DockerKit, DockerReadyChecker}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.ScalaFutures
 
-trait RedisContainer extends DockerKit with ScalaFutures {
+trait RedisContainer extends DockerKit with ScalaFutures with RedisMatchers {
 
   val PORT = 6379
 

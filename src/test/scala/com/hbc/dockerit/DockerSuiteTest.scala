@@ -1,14 +1,12 @@
 package com.hbc.dockerit
 
 import com.hbc.dockerit.containers.{LocalStackContainer, RedisContainer}
-import com.hbc.dockerit.matchers.{CloudWatchMatchers, KinesisMatchers, RedisMatchers}
 import com.hbc.dockerit.models.BankAccount
 import com.hbc.dockerit.util.{KinesisUtil, RedisUtil}
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
-class DockerSuiteTest extends WordSpec with DockerSuite with BeforeAndAfterAll
-  with RedisContainer with RedisMatchers
-  with LocalStackContainer with KinesisMatchers with CloudWatchMatchers {
+class DockerSuiteTest extends WordSpec with BeforeAndAfterAll
+  with DockerSuite with RedisContainer with LocalStackContainer {
 
   def compare: AfterWord = afterWord("compare")
 
@@ -43,7 +41,7 @@ class DockerSuiteTest extends WordSpec with DockerSuite with BeforeAndAfterAll
 
       "haveOnlyKeys" in {
         val expectedKeys = RedisTestData.AccountKey :: RedisTestData.AnimalNoiseMap.keySet.toList
-        redis should haveOnlyKeys(expectedKeys : _*)
+        redis should haveOnlyKeys(expectedKeys: _*)
       }
 
       "haveKeys" in {
@@ -77,15 +75,15 @@ class DockerSuiteTest extends WordSpec with DockerSuite with BeforeAndAfterAll
 
     }
 
-    "have cloudwatch matchers" ignore compare {
-
-      "havePublishedMetrics" in {
-
-        // TODO: coming soon, eventually, at some point
-        3 shouldBe 3
-      }
-
-    }
+    //    "have cloudwatch matchers" that compare {
+    //
+    //      "havePublishedMetrics" in {
+    //
+    //        // TODO: coming soon, eventually, at some point
+    //        3 shouldBe 3
+    //      }
+    //
+    //    }
 
   }
 
