@@ -28,11 +28,13 @@ case class RedisUtil(client: Client) extends CirceSupport {
   /**
     * Call 'mset' with the provided data as UTF8.  Returns self reference for chaining
     */
-  def mSet(data: Map[String, String], timeoutSecs: Int = 5): Unit = {
+  def mSet(data: Map[String, String], timeoutSecs: Int = 5): Unit =
+    client.mSet(mapToUTF8Buffer(data)).result(timeoutSecs)
 
-    val redisVals = data map { case (k, v) => Buf.Utf8(k) -> Buf.Utf8(v) }
-    client.mSet(redisVals).result(timeoutSecs)
-  }
+  def hSet(key: String, data: Map[String, String], timeoutSecs: Int = 5): Unit =
+    client.hMSet(Buf.Utf8(key), mapToUTF8Buffer(data)).result(timeoutSecs)
+
+  private def mapToUTF8Buffer(data: Map[String, String]) = data.map { case (k, v) => Buf.Utf8(k) -> Buf.Utf8(v) }
 
   def get(key: String, timeoutSecs: Int = 5): Option[String] =
     client.get(Buf.Utf8(key)).result(timeoutSecs).map(BufToString(_))
@@ -42,5 +44,4 @@ case class RedisUtil(client: Client) extends CirceSupport {
 
   def set[T](key: String, value: T, timeoutSecs: Int = 5)(implicit encoder: io.circe.Encoder[T]): Unit =
     client.set(Buf.Utf8(key), Buf.Utf8(encode(value))).result(timeoutSecs)
-
 }
