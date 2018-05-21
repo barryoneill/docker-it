@@ -1,8 +1,9 @@
 val V = new {
   val awsSdk = "1.11.313"
-  val scalatest = "3.0.5"
-  val dockerTestKit = "0.9.5"
   val circe = "0.9.3"
+  val dockerTestKit = "0.9.5"
+  val postgresql = "42.2.2"
+  val scalatest = "3.0.5"
 }
 
 val commonsSettings = Seq(
@@ -20,14 +21,15 @@ val commonsSettings = Seq(
   libraryDependencies ++= Seq(
     "com.amazonaws"     % "aws-java-sdk-kinesis"        % V.awsSdk,
     "com.amazonaws"     % "aws-java-sdk-cloudwatch"     % V.awsSdk,
-    "org.scalatest"    %% "scalatest"                   % "3.0.4",
+    "org.scalatest"    %% "scalatest"                   % V.scalatest,
     "com.whisk"        %% "docker-testkit-scalatest"    % V.dockerTestKit,
     "com.whisk"        %% "docker-testkit-impl-spotify" % V.dockerTestKit,
     "cloud.localstack"  % "localstack-utils"            % "0.1.13",
     "com.twitter"      %% "finagle-redis"               % "18.4.0",
     "io.circe"         %% "circe-core"                  % V.circe,
     "io.circe"         %% "circe-generic"               % V.circe,
-    "io.circe"         %% "circe-parser"                % V.circe
+    "io.circe"         %% "circe-parser"                % V.circe,
+    "org.postgresql"    % "postgresql"                  % "42.2.2"
   )
 )
 
