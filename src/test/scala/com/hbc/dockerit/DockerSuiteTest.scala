@@ -107,7 +107,7 @@ class DockerSuiteTest extends WordSpec with BeforeAndAfterAll
       }
     }
 
-    "startup a postgres instance" that {
+    "start a postgres instance" that {
 
       "is available" in {
         dbStatement(stmt => {
