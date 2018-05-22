@@ -12,9 +12,13 @@ import scala.util.Try
 
 trait PostgresContainer extends DockerKit with ScalaFutures {
 
-  object Postgres {
-    val advertisedPort = 5432
+  private val AdvertisedPort = 5432
 
+  private val TimeoutSeconds = 25
+  private val Attempts = 25
+  private val Delay = 2500.milliseconds
+
+  object Postgres {
     val user = "test"
     val password = "T3sT"
 
@@ -24,17 +28,17 @@ trait PostgresContainer extends DockerKit with ScalaFutures {
   }
 
   private[this] val container: DockerContainer = DockerContainer("postgres:9.6.3")
-    .withPorts(Postgres.advertisedPort -> None)
+    .withPorts(AdvertisedPort -> None)
     .withEnv(s"POSTGRES_USER=${Postgres.user}", s"POSTGRES_PASSWORD=${Postgres.password}")
-    .withReadyChecker(new PostgresReadyChecker().looped(60, 500.milliseconds))
+    .withReadyChecker(new PostgresReadyChecker().looped(Attempts, Delay))
 
   abstract override def dockerContainers: List[DockerContainer] = container :: super.dockerContainers
 
   private[containers] def getPostgresPort(portsMapping: Map[Int, Int]) = {
-    portsMapping.getOrElse(Postgres.advertisedPort, Assertions.fail(s"Couldn't find mapping for port ${Postgres.advertisedPort}. (Found: ${container.getPorts()})"))
+    portsMapping.getOrElse(AdvertisedPort, Assertions.fail(s"Couldn't find mapping for port ${AdvertisedPort}. (Found: ${container.getPorts()})"))
   }
 
-  private [containers] def buildUrl(host: String, port: Int): String = s"jdbc:postgresql://${host}:${port}/"
+  private[containers] def buildUrl(host: String, port: Int): String = s"jdbc:postgresql://${host}:${port}/"
 
   private[containers] class PostgresReadyChecker extends DockerReadyChecker {
 
@@ -50,11 +54,8 @@ trait PostgresContainer extends DockerKit with ScalaFutures {
         val host = dockerExecutor.host
         val port = getPostgresPort(portsMapping)
 
-        val rs: ResultSet = getConnection(host, port)
-          .createStatement()
-          .executeQuery("select 1")
-
-        rs.next() && rs.getInt(1) == 1
+        getConnection(host, port)
+          .isValid(TimeoutSeconds)
       }.getOrElse(false))(ec)
     }
   }
