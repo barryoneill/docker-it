@@ -38,7 +38,7 @@ trait PostgresContainer extends DockerKit with ScalaFutures {
     portsMapping.getOrElse(AdvertisedPort, Assertions.fail(s"Couldn't find mapping for port ${AdvertisedPort}. (Found: ${container.getPorts()})"))
   }
 
-  private[containers] def buildUrl(host: String, port: Int): String = s"jdbc:postgresql://${host}:${port}/"
+  private[containers] def buildUrl(host: String, port: Int): String = s"jdbc:postgresql://${host}:${port}/?loggerLevel=OFF"
 
   private[containers] class PostgresReadyChecker extends DockerReadyChecker {
 
