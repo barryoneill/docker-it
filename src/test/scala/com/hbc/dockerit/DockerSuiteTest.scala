@@ -1,12 +1,14 @@
 package com.hbc.dockerit
 
-import com.hbc.dockerit.containers.{LocalStackContainer, RedisContainer}
+import java.sql.{DriverManager, Statement}
+
+import com.hbc.dockerit.containers.{LocalStackContainer, PostgresContainer, RedisContainer}
 import com.hbc.dockerit.models.BankAccount
 import com.hbc.dockerit.util.{KinesisUtil, RedisUtil}
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
 class DockerSuiteTest extends WordSpec with BeforeAndAfterAll
-  with DockerSuite with RedisContainer with LocalStackContainer {
+  with DockerSuite with RedisContainer with LocalStackContainer with PostgresContainer {
 
   def compare: AfterWord = afterWord("compare")
 
@@ -85,6 +87,36 @@ class DockerSuiteTest extends WordSpec with BeforeAndAfterAll
     //
     //    }
 
+  }
+
+
+  "PostgresContainer" should {
+
+    def getConnection() = DriverManager.getConnection(
+      Postgres.url, Postgres.user, Postgres.password)
+
+
+    def dbStatement(f: Statement => Unit) = {
+      val conn = getConnection()
+      try {
+        val stmt = conn.createStatement()
+        f(stmt)
+      } finally {
+        if (conn != null)
+          conn.close()
+      }
+    }
+
+    "start a postgres instance" that {
+
+      "is available" in {
+        dbStatement(stmt => {
+          val rs = stmt.executeQuery("select 1")
+          rs.next() should be(true)
+          rs.getInt(1) should be(1)
+        })
+      }
+    }
   }
 
 }
