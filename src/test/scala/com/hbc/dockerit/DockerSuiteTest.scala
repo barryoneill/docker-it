@@ -2,13 +2,14 @@ package com.hbc.dockerit
 
 import java.sql.{DriverManager, Statement}
 
-import com.hbc.dockerit.containers.{LocalStackContainer, PostgresContainer, RedisContainer}
+import com.hbc.dockerit.containers.{DynamoDBContainer, LocalStackContainer, PostgresContainer, RedisContainer}
+import com.hbc.dockerit.model.dynamodb._
 import com.hbc.dockerit.models.BankAccount
-import com.hbc.dockerit.util.{KinesisUtil, RedisUtil}
+import com.hbc.dockerit.util.{DynamoDBUtil, KinesisUtil, RedisUtil}
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
 class DockerSuiteTest extends WordSpec with BeforeAndAfterAll
-  with DockerSuite with RedisContainer with LocalStackContainer with PostgresContainer {
+  with DockerSuite with RedisContainer with LocalStackContainer with PostgresContainer with DynamoDBContainer {
 
   def compare: AfterWord = afterWord("compare")
 
@@ -92,12 +93,12 @@ class DockerSuiteTest extends WordSpec with BeforeAndAfterAll
 
   "PostgresContainer" should {
 
-    def getConnection() = DriverManager.getConnection(
+    def newConnection = DriverManager.getConnection(
       Postgres.url, Postgres.user, Postgres.password)
 
 
-    def dbStatement(f: Statement => Unit) = {
-      val conn = getConnection()
+    def dbStatement(f: Statement => Unit): Unit = {
+      val conn = newConnection
       try {
         val stmt = conn.createStatement()
         f(stmt)
@@ -117,6 +118,106 @@ class DockerSuiteTest extends WordSpec with BeforeAndAfterAll
         })
       }
     }
+  }
+
+
+  "DynamoDBContainer" should {
+
+    "start a dynamodb instance" that {
+
+      "is available" in {
+        val dynamoDBUtil = DynamoDBUtil(DynamoDB.client)
+        dynamoDBUtil.ping should be (true)
+      }
+
+    }
+
+    "have utils" that {
+
+      "create a table" in {
+        val TableName = "TestTable"
+        val dynamoDBUtil = DynamoDBUtil(DynamoDB.client)
+
+        // ensure table is deleted
+        dynamoDBUtil.deleteTable(TableName)
+
+        val createTableResult = dynamoDBUtil.createTable(
+          tableName = TableName,
+          attributes = Seq(
+            Key(name = "id", dataType = StringDataType, PartitionKeyType)
+          )
+        )
+
+        createTableResult should be(Right(Some(TableDescription(name = TableName))))
+        dynamoDBUtil.tableExists(TableName) should be(Right(true))
+
+        // clean created table
+        dynamoDBUtil.deleteTable(TableName)
+      }
+
+      "do not fail when creating a table that already exists" in {
+        val TableName = "TestTable"
+        val dynamoDBUtil = DynamoDBUtil(DynamoDB.client)
+
+        // ensure table is deleted
+        dynamoDBUtil.deleteTable(TableName)
+
+        val createTableResult = dynamoDBUtil.createTable(
+          tableName = TableName,
+          attributes = Seq(
+            Key(name = "id", dataType = StringDataType, PartitionKeyType)
+          )
+        )
+
+        createTableResult should be(Right(Some(TableDescription(name = TableName))))
+        dynamoDBUtil.tableExists(TableName) should be(Right(true))
+
+        // create table again
+        val createAlreadyExistingTableResult = dynamoDBUtil.createTable(
+          tableName = TableName,
+          attributes = Seq(
+            Key(name = "id", dataType = StringDataType, PartitionKeyType)
+          )
+        )
+
+        createAlreadyExistingTableResult should be(Right(None))
+        dynamoDBUtil.tableExists(TableName) should be(Right(true))
+
+        // clean created table
+        dynamoDBUtil.deleteTable(TableName)
+      }
+
+      "delete a table" in {
+        val TableName = "TestTable"
+        val dynamoDBUtil = DynamoDBUtil(DynamoDB.client)
+
+        // ensure table is deleted
+        dynamoDBUtil.deleteTable(TableName)
+
+        val createTableResult = dynamoDBUtil.createTable(
+          tableName = TableName,
+          attributes = Seq(
+            Key(name = "id", dataType = StringDataType, PartitionKeyType)
+          )
+        )
+
+        createTableResult should be(Right(Some(TableDescription(name = TableName))))
+        dynamoDBUtil.tableExists(TableName) should be(Right(true))
+
+        val deleteTableResult = dynamoDBUtil.deleteTable(TableName)
+        deleteTableResult should be(Right(Some(TableDescription(name = TableName))))
+        dynamoDBUtil.tableExists(TableName) should be(Right(false))
+      }
+
+      "do not fail when deleting a table that doesn't exist" in {
+        val TableName = "TestTable"
+        val dynamoDBUtil = DynamoDBUtil(DynamoDB.client)
+
+        val deleteResult = dynamoDBUtil.deleteTable(TableName)
+        deleteResult should be(Right(None))
+      }
+    }
+
   }
 
 }
