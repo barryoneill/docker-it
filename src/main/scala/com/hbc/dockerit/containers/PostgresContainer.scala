@@ -6,7 +6,7 @@ import com.whisk.docker.{DockerCommandExecutor, DockerContainer, DockerContainer
 import org.scalatest.Assertions
 import org.scalatest.concurrent.ScalaFutures
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.Try
 
@@ -34,16 +34,16 @@ trait PostgresContainer extends DockerKit with ScalaFutures {
 
   abstract override def dockerContainers: List[DockerContainer] = container :: super.dockerContainers
 
-  private[containers] def getPostgresPort(portsMapping: Map[Int, Int]) = {
-    portsMapping.getOrElse(AdvertisedPort, Assertions.fail(s"Couldn't find mapping for port ${AdvertisedPort}. (Found: ${container.getPorts()})"))
+  private[this] def getPostgresPort(portsMapping: Map[Int, Int]) = {
+    portsMapping.getOrElse(AdvertisedPort, Assertions.fail(s"Couldn't find mapping for port $AdvertisedPort. (Found: ${container.getPorts()})"))
   }
 
-  private[containers] def buildUrl(host: String, port: Int): String = s"jdbc:postgresql://${host}:${port}/?loggerLevel=OFF"
+  private[this] def buildUrl(host: String, port: Int): String = s"jdbc:postgresql://$host:$port/?loggerLevel=OFF"
 
-  private[containers] class PostgresReadyChecker extends DockerReadyChecker {
+  private[this] class PostgresReadyChecker extends DockerReadyChecker {
 
     override def apply(container: DockerContainerState)(implicit dockerExecutor: DockerCommandExecutor,
-                                                        ec: ExecutionContext) = {
+                                                        ec: ExecutionContext): Future[Boolean] = {
 
       def getConnection(host: String, port: Int): Connection = DriverManager.getConnection(
         buildUrl(host, port),

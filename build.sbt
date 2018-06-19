@@ -19,8 +19,9 @@ val commonsSettings = Seq(
     "-language:implicitConversions"
   ),
   libraryDependencies ++= Seq(
-    "com.amazonaws"     % "aws-java-sdk-kinesis"        % V.awsSdk,
     "com.amazonaws"     % "aws-java-sdk-cloudwatch"     % V.awsSdk,
+    "com.amazonaws"     % "aws-java-sdk-dynamodb"       % V.awsSdk,
+    "com.amazonaws"     % "aws-java-sdk-kinesis"        % V.awsSdk,
     "org.scalatest"    %% "scalatest"                   % V.scalatest,
     "com.whisk"        %% "docker-testkit-scalatest"    % V.dockerTestKit,
     "com.whisk"        %% "docker-testkit-impl-spotify" % V.dockerTestKit,
