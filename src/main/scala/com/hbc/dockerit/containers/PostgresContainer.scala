@@ -2,6 +2,7 @@ package com.hbc.dockerit.containers
 
 import java.sql.{Connection, DriverManager, ResultSet}
 
+import com.hbc.dockerit.matchers.PostgresMatchers
 import com.whisk.docker.{DockerCommandExecutor, DockerContainer, DockerContainerState, DockerKit, DockerReadyChecker}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.ScalaFutures
@@ -10,21 +11,21 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.Try
 
-trait PostgresContainer extends DockerKit with ScalaFutures {
+trait PostgresContainer extends DockerKit with ScalaFutures with PostgresMatchers {
 
   private val AdvertisedPort = 5432
 
   private val TimeoutSeconds = 25
-  private val Attempts = 25
-  private val Delay = 2500.milliseconds
+  private val Attempts       = 25
+  private val Delay          = 2500.milliseconds
 
   object Postgres {
-    val user = "test"
+    val user     = "test"
     val password = "T3sT"
 
     lazy val host: String = dockerExecutor.host
-    lazy val port: Int = getPostgresPort(container.getPorts().futureValue)
-    lazy val url: String = buildUrl(host, port)
+    lazy val port: Int    = getPostgresPort(container.getPorts().futureValue)
+    lazy val url: String  = buildUrl(host, port)
   }
 
   private[this] val container: DockerContainer = DockerContainer("postgres:9.6.3")
@@ -35,7 +36,9 @@ trait PostgresContainer extends DockerKit with ScalaFutures {
   abstract override def dockerContainers: List[DockerContainer] = container :: super.dockerContainers
 
   private[this] def getPostgresPort(portsMapping: Map[Int, Int]) = {
-    portsMapping.getOrElse(AdvertisedPort, Assertions.fail(s"Couldn't find mapping for port $AdvertisedPort. (Found: ${container.getPorts()})"))
+    portsMapping.getOrElse(
+      AdvertisedPort,
+      Assertions.fail(s"Couldn't find mapping for port $AdvertisedPort. (Found: ${container.getPorts()})"))
   }
 
   private[this] def buildUrl(host: String, port: Int): String = s"jdbc:postgresql://$host:$port/?loggerLevel=OFF"
@@ -45,18 +48,19 @@ trait PostgresContainer extends DockerKit with ScalaFutures {
     override def apply(container: DockerContainerState)(implicit dockerExecutor: DockerCommandExecutor,
                                                         ec: ExecutionContext): Future[Boolean] = {
 
-      def getConnection(host: String, port: Int): Connection = DriverManager.getConnection(
-        buildUrl(host, port),
-        Postgres.user,
-        Postgres.password)
+      def getConnection(host: String, port: Int): Connection =
+        DriverManager.getConnection(buildUrl(host, port), Postgres.user, Postgres.password)
 
-      container.getPorts()(dockerExecutor, ec).map(portsMapping => Try {
-        val host = dockerExecutor.host
-        val port = getPostgresPort(portsMapping)
+      container
+        .getPorts()(dockerExecutor, ec)
+        .map(portsMapping =>
+          Try {
+            val host = dockerExecutor.host
+            val port = getPostgresPort(portsMapping)
 
-        getConnection(host, port)
-          .isValid(TimeoutSeconds)
-      }.getOrElse(false))(ec)
+            getConnection(host, port)
+              .isValid(TimeoutSeconds)
+          }.getOrElse(false))(ec)
     }
   }
 
