@@ -59,6 +59,8 @@ val testSettings = Seq(
   )
 )
 
+parallelExecution in Test := false
+
 lazy val `hbc-docker-it` = project
   .in(file("."))
   .settings(

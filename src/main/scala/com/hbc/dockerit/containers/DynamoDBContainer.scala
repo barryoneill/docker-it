@@ -8,8 +8,8 @@ import com.whisk.docker.{DockerCommandExecutor, DockerContainer, DockerContainer
 import org.scalatest.Assertions
 import org.scalatest.concurrent.ScalaFutures
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 trait DynamoDBContainer extends DockerKit with ScalaFutures with DynamoDBMatchers {
@@ -18,16 +18,14 @@ trait DynamoDBContainer extends DockerKit with ScalaFutures with DynamoDBMatcher
 
   private val AdvertisedPort = 8000
 
-  private val TimeoutSeconds = 25
-  private val Attempts       = 25
-  private val Delay          = 2500.milliseconds
+  private val Attempts = 25
+  private val Delay    = 2500.milliseconds
 
-  object DynamoDB {
-    lazy val host: String     = dockerExecutor.host
-    lazy val port: Int        = getDynamoDBPort(container.getPorts().futureValue)
-    lazy val url: String      = buildUrl(host, port)
-    lazy val client: DynamoDB = buildClient(url)
-  }
+  private lazy val dynamoDBHost: String = dockerExecutor.host
+  private lazy val dynamoDBPort: Int    = getDynamoDBPort(container.getPorts().futureValue)
+
+  lazy val dynamoDBURL: String          = s"http://$dynamoDBHost:$dynamoDBPort"
+  lazy val dynamoDB: DynamoDB = buildClient(dynamoDBURL)
 
   private[this] val container: DockerContainer = DockerContainer("dwmkerr/dynamodb:38")
     .withPorts(AdvertisedPort -> None)
@@ -41,13 +39,9 @@ trait DynamoDBContainer extends DockerKit with ScalaFutures with DynamoDBMatcher
       Assertions.fail(s"Couldn't find mapping for port $AdvertisedPort. (Found: ${container.getPorts()})"))
   }
 
-  private[this] def buildUrl(host: String, port: Int): String = s"http://$host:$port"
-
-  private[this] def buildClient(url: String): DynamoDB = {
+  def buildClient(url: String): DynamoDB = {
     val endpoint = new AwsClientBuilder.EndpointConfiguration(url, AwsRegion)
-    lazy val client: AmazonDynamoDB = AmazonDynamoDBClientBuilder.standard
-      .withEndpointConfiguration(endpoint)
-      .build
+    lazy val client: AmazonDynamoDB = AmazonDynamoDBClientBuilder.standard.withEndpointConfiguration(endpoint).build
     new DynamoDB(client)
   }
 
@@ -56,18 +50,14 @@ trait DynamoDBContainer extends DockerKit with ScalaFutures with DynamoDBMatcher
     override def apply(container: DockerContainerState)(implicit dockerExecutor: DockerCommandExecutor,
                                                         ec: ExecutionContext): Future[Boolean] = {
 
-      container
-        .getPorts()(dockerExecutor, ec)
-        .map(portsMapping =>
-          Try {
-            val host = dockerExecutor.host
-            val port = getDynamoDBPort(portsMapping)
-            val url  = buildUrl(host, port)
+      Future {
+        Try {
+          val client = buildClient(dynamoDBURL)
+          client.listTables(1)
+          true
+        }.getOrElse(false)
+      }(ec)
 
-            val client = buildClient(url)
-            client.listTables(1)
-            true
-          }.getOrElse(false))(ec)
     }
   }
 

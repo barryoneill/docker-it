@@ -17,7 +17,7 @@ trait KinesisMatchers extends Matchers with CirceSupport {
 
     def havePendingEvents[T](streamName: String, expectedEvents: Seq[T])
                                 (implicit decoder: io.circe.Decoder[T],
-                                 encoder: io.circe.Encoder[T]) = Matcher { (kinesis: AmazonKinesis) =>
+                                 encoder: io.circe.Encoder[T]) = Matcher { kinesis: AmazonKinesis =>
 
       val actualEvents = KinesisUtil(kinesis).getRecords[T](streamName)
 
