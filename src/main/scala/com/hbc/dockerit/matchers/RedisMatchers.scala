@@ -12,7 +12,7 @@ trait RedisMatchers extends Matchers with CirceSupport {
 
   lazy val redis: Client = Redis.newRichClient(s"localhost:$redisPort")
 
-  def haveKeysMatching(pattern: String) = Matcher { (c: Client) =>
+  def haveKeysMatching(pattern: String) = Matcher { c: Client =>
     val actualKeys = RedisUtil(c).keys(pattern).toList
 
     MatchResult(actualKeys.nonEmpty,
@@ -21,7 +21,7 @@ trait RedisMatchers extends Matchers with CirceSupport {
     )
   }
 
-  def haveKeys(expectedKeys: String*) = Matcher { (c: Client) =>
+  def haveKeys(expectedKeys: String*) = Matcher { c: Client =>
 
     val actualKeys = RedisUtil(c).keys("*")
 
@@ -33,7 +33,7 @@ trait RedisMatchers extends Matchers with CirceSupport {
     )
   }
 
-  def haveOnlyKeys(expectedKeys: String*) = Matcher { (c: Client) =>
+  def haveOnlyKeys(expectedKeys: String*) = Matcher { c: Client =>
     val actualKeys = RedisUtil(c).keys("*").toList
 
     MatchResult(
@@ -43,7 +43,7 @@ trait RedisMatchers extends Matchers with CirceSupport {
     )
   }
 
-  def haveValueOnGet(key: String, expected: String) = Matcher { (c: Client) =>
+  def haveValueOnGet(key: String, expected: String) = Matcher { c: Client =>
 
     RedisUtil(c).get(key) match {
 
@@ -59,7 +59,7 @@ trait RedisMatchers extends Matchers with CirceSupport {
 
   def haveEncodedValueOnGet[T](key: String, expectedObj: T)
                               (implicit decoder: io.circe.Decoder[T],
-                                encoder: io.circe.Encoder[T]) = Matcher { (c: Client) =>
+                                encoder: io.circe.Encoder[T]) = Matcher { c: Client =>
 
     val expectedJSON = encode[T](expectedObj)
 

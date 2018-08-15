@@ -22,8 +22,7 @@ case class DynamoDBUtil(client: DynamoDB) {
 
   def tableExists(tableName: String): Either[Error, Boolean] = {
     Try {
-      val table = client.getTable(tableName)
-      table.describe()
+      client.getTable(tableName).describe()
     } match {
       case Success(_) => Right(true)
       case Failure(e) =>
