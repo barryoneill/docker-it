@@ -84,4 +84,12 @@ case class DynamoDBUtil(client: DynamoDB) {
     }
   }
 
+  def getItemCount(tableName: String): Either[Error, Long] = {
+    Try {
+      client.getTable(tableName).describe()
+    } match {
+      case Success(desc) => Right(desc.getItemCount)
+    }
+  }
+
 }
