@@ -1,14 +1,17 @@
 val V = new {
-  val awsSdk = "1.11.313"
-  val circe = "0.9.3"
-  val dockerTestKit = "0.9.5"
-  val postgresql = "42.2.2"
+  val awsSdk = "1.11.424"
+  val circe = "0.10.0"
+  val dockerTestKit = "0.9.8"
+  val postgresql = "42.2.5"
   val scalatest = "3.0.5"
+  val localstackUtils = "0.1.15"
+  val finagleRedis = "18.9.1"
+  val postgreSQL = "42.2.5"
 }
 
 val commonsSettings = Seq(
   organization := "com.hbc",
-  scalaVersion := "2.12.6",
+  scalaVersion := "2.12.7",
   scalacOptions ++= Seq(
     "-encoding",
     "UTF-8",
@@ -25,12 +28,12 @@ val commonsSettings = Seq(
     "org.scalatest"    %% "scalatest"                   % V.scalatest,
     "com.whisk"        %% "docker-testkit-scalatest"    % V.dockerTestKit,
     "com.whisk"        %% "docker-testkit-impl-spotify" % V.dockerTestKit,
-    "cloud.localstack"  % "localstack-utils"            % "0.1.13",
-    "com.twitter"      %% "finagle-redis"               % "18.4.0",
+    "cloud.localstack"  % "localstack-utils"            % V.localstackUtils,
+    "com.twitter"      %% "finagle-redis"               % V.finagleRedis,
     "io.circe"         %% "circe-core"                  % V.circe,
     "io.circe"         %% "circe-generic"               % V.circe,
     "io.circe"         %% "circe-parser"                % V.circe,
-    "org.postgresql"    % "postgresql"                  % "42.2.2"
+    "org.postgresql"    % "postgresql"                  % V.postgreSQL
   )
 )
 
