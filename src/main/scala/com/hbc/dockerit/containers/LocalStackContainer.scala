@@ -14,7 +14,7 @@ trait LocalStackContainer extends DockerKit with ScalaFutures
   val PORT_CLOUDWATCH = 4582
   val PORTS = Seq(PORT_WEB_UI, PORT_KINESIS, PORT_CLOUDWATCH)
 
-  private[this] val container: DockerContainer = DockerContainer("localstack/localstack:0.8.6")
+  private[this] val container: DockerContainer = DockerContainer("localstack/localstack:0.8.7")
     .withPorts(PORTS.map(_ -> None): _*)
     .withReadyChecker(DockerReadyChecker.LogLineContains("Ready."))
 

@@ -9,7 +9,7 @@ trait RedisContainer extends DockerKit with ScalaFutures with RedisMatchers {
 
   val PORT = 6379
 
-  private[this] val container: DockerContainer = DockerContainer("redis:3.2.11")
+  private[this] val container: DockerContainer = DockerContainer("redis:3.2.12")
     .withPorts(PORT -> None)
     .withReadyChecker(DockerReadyChecker.LogLineContains("The server is now ready to accept connections"))
 
