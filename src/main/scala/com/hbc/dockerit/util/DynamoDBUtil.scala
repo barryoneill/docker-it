@@ -89,6 +89,7 @@ case class DynamoDBUtil(client: DynamoDB) {
       client.getTable(tableName).describe()
     } match {
       case Success(desc) => Right(desc.getItemCount)
+      case Failure(e) => Left(DynamoDBError(cause = Some(e)))
     }
   }
 
