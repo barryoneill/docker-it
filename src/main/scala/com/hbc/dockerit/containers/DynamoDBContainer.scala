@@ -27,7 +27,7 @@ trait DynamoDBContainer extends DockerKit with ScalaFutures with DynamoDBMatcher
   lazy val dynamoDBURL: String          = s"http://$dynamoDBHost:$dynamoDBPort"
   lazy val dynamoDB: DynamoDB = buildClient(dynamoDBURL)
 
-  private[this] val container: DockerContainer = DockerContainer("dwmkerr/dynamodb:38")
+  private[this] val container: DockerContainer = DockerContainer("amazon/dynamodb-local:1.11.119")
     .withPorts(AdvertisedPort -> None)
     .withReadyChecker(new DynamoDBReadyChecker().looped(Attempts, Delay))
 
