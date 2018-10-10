@@ -7,6 +7,8 @@ val V = new {
   val localstackUtils = "0.1.15"
   val finagleRedis = "18.9.1"
   val postgreSQL = "42.2.5"
+  val kafka  = "2.0.0"
+  val log4j = "1.7.5"
 }
 
 val commonsSettings = Seq(
@@ -33,9 +35,12 @@ val commonsSettings = Seq(
     "io.circe"         %% "circe-core"                  % V.circe,
     "io.circe"         %% "circe-generic"               % V.circe,
     "io.circe"         %% "circe-parser"                % V.circe,
-    "org.postgresql"    % "postgresql"                  % V.postgreSQL
+    "org.postgresql"    % "postgresql"                  % V.postgreSQL,
+    "org.apache.kafka" %% "kafka"                       % V.kafka,
+    "org.slf4j"         % "slf4j-log4j12"               % V.log4j
   )
 )
+
 
 val publishSettings = Seq(
   publishMavenStyle := true,
