@@ -9,7 +9,7 @@ import org.scalatest.WordSpec
 
 class KafkaContainerSpec extends WordSpec with DockerSuite with KafkaContainer {
 
-  lazy val kafkaUtil = KafkaUtil(KafkaContainerClient)
+  lazy val kafkaUtil = KafkaUtil(Kafka)
 
   def compare: AfterWord = afterWord("compare")
 
