@@ -1,0 +1,29 @@
+dist: trusty
+sudo: false
+
+language: scala
+scala:
+  - 2.12.6
+
+services:
+  - docker
+
+cache:
+  directories:
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt"
+
+before_cache:
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
+  - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
+  - find $HOME/.ivy2/cache -name "*.lock" | xargs rm -rf
+
+script:
+   - sbt ++$TRAVIS_SCALA_VERSION fullCiBuild
+
+#deploy:
+#  - provider: script
+#    skip_cleanup: true
+#    script: sbt ++$TRAVIS_SCALA_VERSION publishAll
+#    on:
+#      tags: true

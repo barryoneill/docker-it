@@ -77,5 +77,6 @@ lazy val `hbc-docker-it` = project
   .settings(commonsSettings ++ publishSettings ++ testSettings: _*)
   .enablePlugins(GitVersioning)
   .settings(
-    git.useGitDescribe := true
+    git.useGitDescribe := true,
+    addCommandAlias("fullCiBuild", ";clean;test")
   )
