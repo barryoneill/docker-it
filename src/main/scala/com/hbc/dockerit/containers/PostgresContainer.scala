@@ -28,7 +28,7 @@ trait PostgresContainer extends DockerKit with ScalaFutures with PostgresMatcher
     lazy val url: String  = buildUrl(host, port)
   }
 
-  private[this] val container: DockerContainer = DockerContainer("postgres:11")
+  private[this] val container: DockerContainer = DockerContainer("postgres:10.4")
     .withPorts(AdvertisedPort -> None)
     .withEnv(s"POSTGRES_USER=${Postgres.user}", s"POSTGRES_PASSWORD=${Postgres.password}")
     .withReadyChecker(new PostgresReadyChecker().looped(Attempts, Delay))
