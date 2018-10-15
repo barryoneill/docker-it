@@ -24,16 +24,29 @@ trait DockerSuite extends DockerTestKit { this: Suite =>
       fail(s"To use ${getClass.getSimpleName}, you must implement at least one container trait")
     }
 
-    println("*** Waiting for containers ** (may take a little while - even more so if the images have to be fetched as well)")
+
+    log(s"            ----- containers starting ------    ")
+    dockerContainers.foreach {
+      dc => log(s" container '${dc.name.get}' starting with image '${dc.image}'..")
+    }
+
+    log(s" warning: may be slow, esp. if images have to be downloaded..")
 
     super.beforeAll()
 
-    println("Containers ready.  Mapped ports are: ")
-
     dockerContainers.foreach(c => {
-      println(s" - container (${c.getName().futureValue}): ${c.getPorts().futureValue}")
+      log(s"  - '${c.getName().futureValue}' ports: ")
+      c.getPorts().futureValue.foreach(mapping => {
+        log(s"       ${mapping._2} (local) => ${mapping._1} (container)" )
+      })
     })
 
+    log(s"            ----- containers started ------    ")
+
+  }
+
+  private[this] def log(msg: String){
+    println(s"  -- hbc-docker-it   $msg") // TODO: add logging framework
   }
 
   override def afterAll(): Unit = {

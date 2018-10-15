@@ -9,12 +9,15 @@ import org.scalatest.concurrent.ScalaFutures
 trait LocalStackContainer extends DockerKit with ScalaFutures
                     with KinesisMatchers with CloudWatchMatchers {
 
+  private val ContainerName = s"localstack-${System.currentTimeMillis}"
+
   val PORT_WEB_UI = 8080
   val PORT_KINESIS = 4568
   val PORT_CLOUDWATCH = 4582
   val PORTS = Seq(PORT_WEB_UI, PORT_KINESIS, PORT_CLOUDWATCH)
 
-  private[this] val container: DockerContainer = DockerContainer("localstack/localstack:0.8.7")
+  private[this] val container: DockerContainer =
+    DockerContainer("localstack/localstack:0.8.7", name=Some(ContainerName))
     .withPorts(PORTS.map(_ -> None): _*)
     .withReadyChecker(DockerReadyChecker.LogLineContains("Ready."))
 

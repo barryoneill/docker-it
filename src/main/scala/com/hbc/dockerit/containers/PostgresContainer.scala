@@ -14,6 +14,7 @@ import scala.util.Try
 trait PostgresContainer extends DockerKit with ScalaFutures with PostgresMatchers {
 
   private val AdvertisedPort = 5432
+  private val ContainerName = s"postgres-${System.currentTimeMillis}"
 
   private val TimeoutSeconds = 25
   private val Attempts       = 25
@@ -28,7 +29,8 @@ trait PostgresContainer extends DockerKit with ScalaFutures with PostgresMatcher
     lazy val url: String  = buildUrl(host, port)
   }
 
-  private[this] val container: DockerContainer = DockerContainer("postgres:10.4")
+  private[this] val container: DockerContainer =
+    DockerContainer("postgres:10.4", name=Some(ContainerName))
     .withPorts(AdvertisedPort -> None)
     .withEnv(s"POSTGRES_USER=${Postgres.user}", s"POSTGRES_PASSWORD=${Postgres.password}")
     .withReadyChecker(new PostgresReadyChecker().looped(Attempts, Delay))
