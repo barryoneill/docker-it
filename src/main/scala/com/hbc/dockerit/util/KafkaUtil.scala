@@ -42,24 +42,27 @@ case class KafkaUtil(kafka: Kafka) extends CirceSupport {
 
   def putRecordsJSON[T](topic: String, records: Seq[T], partitionKeyFunc: T => String)(
       implicit encoder: io.circe.Encoder[T]): Seq[RecordMetadata] =
-    records.map(r =>
-      kafka.withStringProducer { producer =>
-        producer.send(new ProducerRecord(topic, partitionKeyFunc(r), encode(r))).get(DefaultWaitSecs, SECONDS)
-    })
+    putRecords(topic, records.map(r => (partitionKeyFunc(r), encode(r))))
 
   def pollRecordsJSON[T](consumerGroupID: String, topic: String, timeoutSecs: Int = 5)(
-      implicit encoder: io.circe.Decoder[T]): Seq[(String, T)] = {
+      implicit encoder: io.circe.Decoder[T]): Seq[(String, T)] =
+    pollRecords(consumerGroupID, topic, timeoutSecs).map { case (key, event) => key -> decodeOrThrow[T](event) }
 
+  def pollRecords(consumerGroupID: String, topic: String, timeoutSecs: Int = 5): Seq[(String, String)] =
     kafka.withStringConsumer(consumerGroupID) { consumer =>
       consumer.subscribe(singletonList(topic))
-
       val recs = consumer.poll(JDuration.ofSeconds(timeoutSecs)).asScala.toList
-
       consumer.commitSync()
-
-      recs.map(r => (r.key(), decodeOrThrow[T](r.value())))
+      recs.map(r => r.key() -> r.value())
     }
-  }
+
+  def putRecords(topic: String, records: Seq[(String, String)]): Seq[RecordMetadata] =
+    kafka.withStringProducer { producer =>
+      records.map {
+        case (key, payload) =>
+          producer.send(new ProducerRecord(topic, key, payload)).get(DefaultWaitSecs, SECONDS)
+      }
+    }
 
   def autoClose[A <: AutoCloseable, B](autoCloseableFunc: A)(f: A ⇒ B): B = {
     try {
