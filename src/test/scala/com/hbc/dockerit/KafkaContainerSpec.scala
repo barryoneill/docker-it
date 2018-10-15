@@ -33,7 +33,6 @@ class KafkaContainerSpec extends WordSpec with DockerSuite with KafkaContainer {
         val testId = s"jsontest-${UUID.randomUUID()}"
 
         val topicName = s"schemaless-topic-$testId"
-        println(topicName)
 
         kafkaUtil.createTopics(topicName)
 
@@ -45,6 +44,28 @@ class KafkaContainerSpec extends WordSpec with DockerSuite with KafkaContainer {
         val fetched = kafkaUtil.pollRecordsJSON[BankAccount](s"group-$testId", topicName)
 
         fetched should equal(List(("1234-RICH-GUY-99999.99", rec1),("1234-POOR-GUY-0.01", rec2)))
+
+      }
+
+      "can send and read strings" in {
+
+        val testId = s"jsontest-${UUID.randomUUID()}"
+
+        val topicName = s"schemaless-topic-$testId"
+        println(topicName)
+
+        kafkaUtil.createTopics(topicName)
+
+        val records = Seq(
+          "rec1Key" -> "this is the first record..",
+          "rec2Key" -> ".. and the second.  We don't care that the contents aren't structured."
+        )
+
+        kafkaUtil.putRecords(topicName, records)
+
+        val fetched = kafkaUtil.pollRecords(s"group-$testId", topicName)
+
+        fetched should equal(records)
 
       }
 
