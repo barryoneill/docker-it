@@ -17,6 +17,7 @@ trait DynamoDBContainer extends DockerKit with ScalaFutures with DynamoDBMatcher
   val AwsRegion = "us-east-1" // can be any region for dynamodb local
 
   private val AdvertisedPort = 8000
+  private val ContainerName = s"dynamodb-${System.currentTimeMillis}"
 
   private val Attempts = 25
   private val Delay    = 2500.milliseconds
@@ -27,7 +28,8 @@ trait DynamoDBContainer extends DockerKit with ScalaFutures with DynamoDBMatcher
   lazy val dynamoDBURL: String          = s"http://$dynamoDBHost:$dynamoDBPort"
   lazy val dynamoDB: DynamoDB = buildClient(dynamoDBURL)
 
-  private[this] val container: DockerContainer = DockerContainer("amazon/dynamodb-local:1.11.119")
+  private[this] val container: DockerContainer =
+    DockerContainer("amazon/dynamodb-local:1.11.119", name = Some(ContainerName))
     .withPorts(AdvertisedPort -> None)
     .withReadyChecker(new DynamoDBReadyChecker().looped(Attempts, Delay))
 
