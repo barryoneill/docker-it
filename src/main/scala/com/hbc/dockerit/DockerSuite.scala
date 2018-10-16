@@ -35,9 +35,9 @@ trait DockerSuite extends DockerTestKit { this: Suite =>
     super.beforeAll()
 
     dockerContainers.foreach(c => {
-      log(s"  - '${c.getName().futureValue}' ports: ")
+      log(s"  - '${c.getName().futureValue}' ports (local => container): ")
       c.getPorts().futureValue.foreach(mapping => {
-        log(s"       ${mapping._2} (local) => ${mapping._1} (container)" )
+        log(s"       ${mapping._2} => ${mapping._1} " )
       })
     })
 
