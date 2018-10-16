@@ -20,7 +20,7 @@ class LocalstackContainerSpec extends WordSpec with BeforeAndAfterAll
 
     val kinesisUtil = KinesisUtil(kinesis)
     kinesisUtil.createStream(KinesisTestData.StreamName)
-    kinesisUtil.putRecords[BankAccount](KinesisTestData.StreamName, KinesisTestData.BankAccounts, r => r.accountNumber)
+    kinesisUtil.putRecordsJSON[BankAccount](KinesisTestData.StreamName, KinesisTestData.BankAccounts, r => r.accountNumber)
   }
 
   "LocalstackContainer" should {

@@ -44,6 +44,14 @@ case class KafkaUtil(kafka: Kafka) extends CirceSupport {
       implicit encoder: io.circe.Encoder[T]): Seq[RecordMetadata] =
     putRecords(topic, records.map(r => (partitionKeyFunc(r), encode(r))))
 
+  def putRecords(topic: String, records: Seq[(String, String)]): Seq[RecordMetadata] =
+    kafka.withStringProducer { producer =>
+      records.map {
+        case (key, payload) =>
+          producer.send(new ProducerRecord(topic, key, payload)).get(DefaultWaitSecs, SECONDS)
+      }
+    }
+
   def pollRecordsJSON[T](consumerGroupID: String, topic: String, timeoutSecs: Int = 5)(
       implicit encoder: io.circe.Decoder[T]): Seq[(String, T)] =
     pollRecords(consumerGroupID, topic, timeoutSecs).map { case (key, event) => key -> decodeOrThrow[T](event) }
@@ -54,14 +62,6 @@ case class KafkaUtil(kafka: Kafka) extends CirceSupport {
       val recs = consumer.poll(JDuration.ofSeconds(timeoutSecs)).asScala.toList
       consumer.commitSync()
       recs.map(r => r.key() -> r.value())
-    }
-
-  def putRecords(topic: String, records: Seq[(String, String)]): Seq[RecordMetadata] =
-    kafka.withStringProducer { producer =>
-      records.map {
-        case (key, payload) =>
-          producer.send(new ProducerRecord(topic, key, payload)).get(DefaultWaitSecs, SECONDS)
-      }
     }
 
   def autoClose[A <: AutoCloseable, B](autoCloseableFunc: A)(f: A ⇒ B): B = {

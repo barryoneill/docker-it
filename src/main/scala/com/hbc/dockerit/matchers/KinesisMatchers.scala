@@ -19,9 +19,9 @@ trait KinesisMatchers extends Matchers with CirceSupport {
                                 (implicit decoder: io.circe.Decoder[T],
                                  encoder: io.circe.Encoder[T]) = Matcher { kinesis: AmazonKinesis =>
 
-      val actualEvents = KinesisUtil(kinesis).getRecords[T](streamName)
+      val actualEvents = KinesisUtil(kinesis).getRecordsJSON[T](streamName)
 
-      MatchResult(actualEvents.size == expectedEvents.size && actualEvents.toSet == expectedEvents.toSet,
+      MatchResult(actualEvents.size == expectedEvents.size && actualEvents.map(_._2).toSet == expectedEvents.toSet,
         s"""Expected events $expectedEvents but got $actualEvents""",
         s"""Found only $actualEvents"""
       )

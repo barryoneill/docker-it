@@ -25,7 +25,11 @@ case class KinesisUtil(client: AmazonKinesis) extends CirceSupport {
     createStreamResult
   }
 
-  def getRecords[T](streamName: String)(implicit decoder: io.circe.Decoder[T]): Seq[T] = {
+  def getRecordsJSON[T](streamName: String)(implicit decoder: io.circe.Decoder[T]): Seq[(String, T)] =
+    getRecords(streamName).map { case (key, event) => key -> decodeOrThrow[T](event) }
+
+
+  def getRecords(streamName: String): Seq[(String, String)] = {
 
     val iteratorResp = client.getShardIterator(new GetShardIteratorRequest()
       .withStreamName(streamName)
@@ -33,19 +37,22 @@ case class KinesisUtil(client: AmazonKinesis) extends CirceSupport {
       .withShardIteratorType(ShardIteratorType.TRIM_HORIZON))
 
     client.getRecords(new GetRecordsRequest().withShardIterator(iteratorResp.getShardIterator)).getRecords.asScala
-      .map(r => new String(r.getData.array(), "UTF8"))
-      .map(decodeOrThrow[T])
+      .map(r => r.getPartitionKey -> new String(r.getData.array(), "UTF8"))
   }
 
-  def putRecords[T](streamName: String, records: Seq[T], shardKeyFunc: T => String)(implicit encoder: io.circe.Encoder[T]): PutRecordsResult = {
+  def putRecordsJSON[T](streamName: String, records: Seq[T], shardKeyFunc: T => String)
+                   (implicit encoder: io.circe.Encoder[T]): PutRecordsResult =
+    putRecords(streamName, records.map(r => (shardKeyFunc(r), encode(r))))
+
+  def putRecords(streamName: String, records: Seq[(String,String)]): PutRecordsResult = {
 
     val request = new PutRecordsRequest()
       .withStreamName(streamName)
-      .withRecords(asJavaCollection(records.map(r => {
+      .withRecords(asJavaCollection(records.map { case(k, v) =>
         new PutRecordsRequestEntry()
-          .withPartitionKey(shardKeyFunc(r))
-          .withData(ByteBuffer.wrap(encode(r).getBytes("UTF-8")))
-      })))
+          .withPartitionKey(k)
+          .withData(ByteBuffer.wrap(v.getBytes("UTF-8")))
+      }))
 
     client.putRecords(request)
 
