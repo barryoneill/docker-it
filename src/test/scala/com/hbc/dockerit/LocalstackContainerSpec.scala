@@ -3,16 +3,20 @@ package com.hbc.dockerit
 import com.hbc.dockerit.containers.LocalStackContainer
 import com.hbc.dockerit.models.BankAccount
 import com.hbc.dockerit.util.KinesisUtil
-import org.scalatest.{BeforeAndAfterAll, WordSpec}
+import org.scalatest.{ BeforeAndAfterAll, WordSpec }
 
-class LocalstackContainerSpec extends WordSpec with BeforeAndAfterAll
-                    with DockerSuite with LocalStackContainer {
+class LocalstackContainerSpec
+    extends WordSpec
+    with BeforeAndAfterAll
+    with DockerSuite
+    with LocalStackContainer {
 
   def compare: AfterWord = afterWord("compare")
 
   object KinesisTestData {
     val StreamName = "testStream"
-    val BankAccounts = Seq(BankAccount("One", 1111), BankAccount("Two", 2222), BankAccount("Three", 333))
+    val BankAccounts =
+      Seq(BankAccount("One", 1111), BankAccount("Two", 2222), BankAccount("Three", 333))
   }
 
   override def beforeAll(): Unit = {
@@ -20,7 +24,11 @@ class LocalstackContainerSpec extends WordSpec with BeforeAndAfterAll
 
     val kinesisUtil = KinesisUtil(kinesis)
     kinesisUtil.createStream(KinesisTestData.StreamName)
-    kinesisUtil.putRecordsJSON[BankAccount](KinesisTestData.StreamName, KinesisTestData.BankAccounts, r => r.accountNumber)
+    kinesisUtil.putRecordsJSON[BankAccount](
+      KinesisTestData.StreamName,
+      KinesisTestData.BankAccounts,
+      r => r.accountNumber
+    )
   }
 
   "LocalstackContainer" should {
@@ -44,6 +52,5 @@ class LocalstackContainerSpec extends WordSpec with BeforeAndAfterAll
     //    }
 
   }
-
 
 }

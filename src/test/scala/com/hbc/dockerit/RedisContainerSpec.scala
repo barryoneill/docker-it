@@ -10,7 +10,8 @@ class RedisContainerSpec extends WordSpec with DockerSuite with RedisContainer {
   def compare: AfterWord = afterWord("compare")
 
   object RedisTestData {
-    val AnimalNoiseMap = Map("cat" -> "miaow", "dog" -> "woof", "duck" -> "quack", "human" -> "talk")
+    val AnimalNoiseMap =
+      Map("cat" -> "miaow", "dog" -> "woof", "duck" -> "quack", "human" -> "talk")
     val AccountKey = "savingsacc"
     val AccountVal = BankAccount("1234-RICH-GUY", 99999.99)
   }

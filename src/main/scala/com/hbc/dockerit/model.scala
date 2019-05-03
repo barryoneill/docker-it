@@ -1,11 +1,11 @@
 package com.hbc.dockerit
 
-import com.amazonaws.services.dynamodbv2.model.{AttributeDefinition => AwsAttribute}
-import com.amazonaws.services.dynamodbv2.model.{ScalarAttributeType => AwsAttributeType}
-import com.amazonaws.services.dynamodbv2.model.{KeySchemaElement => AwsKey}
-import com.amazonaws.services.dynamodbv2.model.{KeyType => AwsKeyType}
-import com.amazonaws.services.dynamodbv2.model.{ProvisionedThroughput => AwsProvisionedThroughput}
-import com.amazonaws.services.dynamodbv2.model.{TableDescription => AwsTableDescription}
+import com.amazonaws.services.dynamodbv2.model.{ AttributeDefinition => AwsAttribute }
+import com.amazonaws.services.dynamodbv2.model.{ ScalarAttributeType => AwsAttributeType }
+import com.amazonaws.services.dynamodbv2.model.{ KeySchemaElement => AwsKey }
+import com.amazonaws.services.dynamodbv2.model.{ KeyType => AwsKeyType }
+import com.amazonaws.services.dynamodbv2.model.{ ProvisionedThroughput => AwsProvisionedThroughput }
+import com.amazonaws.services.dynamodbv2.model.{ TableDescription => AwsTableDescription }
 
 object model {
 
@@ -21,9 +21,8 @@ object model {
     // TODO add secondary indexes (see com.amazonaws.services.dynamodbv2.model.CreateTableRequest.{localSecondaryIndexes, globalSecondaryIndexes}
 
     object Attribute {
-      def toAwsAttribute(attribute: Attribute): AwsAttribute = {
+      def toAwsAttribute(attribute: Attribute): AwsAttribute =
         new AwsAttribute(attribute.name, attribute.dataType.awsAttributeType)
-      }
 
       def toAwsKey(attribute: Attribute): Option[AwsKey] = attribute match {
         case key: Key => Some(new AwsKey(attribute.name, key.keyType.awsKeyType))
@@ -71,7 +70,8 @@ object model {
     case class TableDescription(name: String)
 
     object TableDescription {
-      def fromAws(awsTableDescr: AwsTableDescription): TableDescription = TableDescription(awsTableDescr.getTableName)
+      def fromAws(awsTableDescr: AwsTableDescription): TableDescription =
+        TableDescription(awsTableDescr.getTableName)
     }
 
   }

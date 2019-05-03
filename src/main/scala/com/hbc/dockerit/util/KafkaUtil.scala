@@ -1,11 +1,11 @@
 package com.hbc.dockerit.util
-import java.time.{Duration => JDuration}
+import java.time.{ Duration => JDuration }
 import java.util.Collections.singletonList
 import java.util.concurrent.TimeUnit.SECONDS
 
 import com.hbc.dockerit.containers.Kafka
 import org.apache.kafka.clients.admin.NewTopic
-import org.apache.kafka.clients.producer.{ProducerRecord, RecordMetadata}
+import org.apache.kafka.clients.producer.{ ProducerRecord, RecordMetadata }
 
 import scala.collection.JavaConverters._
 
@@ -15,7 +15,7 @@ import scala.collection.JavaConverters._
   */
 case class KafkaUtil(kafka: Kafka) extends CirceSupport {
 
-  val DefaultWaitSecs = 5
+  val DefaultWaitSecs = 5L
 
   def listTopics(): Seq[String] = kafka.withAdminClient { client =>
     client
@@ -41,7 +41,8 @@ case class KafkaUtil(kafka: Kafka) extends CirceSupport {
   }
 
   def putRecordsJSON[T](topic: String, records: Seq[T], partitionKeyFunc: T => String)(
-      implicit encoder: io.circe.Encoder[T]): Seq[RecordMetadata] =
+    implicit encoder: io.circe.Encoder[T]
+  ): Seq[RecordMetadata] =
     putRecords(topic, records.map(r => (partitionKeyFunc(r), encode(r))))
 
   def putRecords(topic: String, records: Seq[(String, String)]): Seq[RecordMetadata] =
@@ -52,11 +53,18 @@ case class KafkaUtil(kafka: Kafka) extends CirceSupport {
       }
     }
 
-  def pollRecordsJSON[T](consumerGroupID: String, topic: String, timeoutSecs: Int = 5)(
-      implicit encoder: io.circe.Decoder[T]): Seq[(String, T)] =
-    pollRecords(consumerGroupID, topic, timeoutSecs).map { case (key, event) => key -> decodeOrThrow[T](event) }
+  def pollRecordsJSON[T](consumerGroupID: String, topic: String, timeoutSecs: Long = 5)(
+    implicit encoder: io.circe.Decoder[T]
+  ): Seq[(String, T)] =
+    pollRecords(consumerGroupID, topic, timeoutSecs).map {
+      case (key, event) => key -> decodeOrThrow[T](event)
+    }
 
-  def pollRecords(consumerGroupID: String, topic: String, timeoutSecs: Int = 5): Seq[(String, String)] =
+  def pollRecords(
+    consumerGroupID: String,
+    topic: String,
+    timeoutSecs: Long = 5
+  ): Seq[(String, String)] =
     kafka.withStringConsumer(consumerGroupID) { consumer =>
       consumer.subscribe(singletonList(topic))
       val recs = consumer.poll(JDuration.ofSeconds(timeoutSecs)).asScala.toList
@@ -64,12 +72,11 @@ case class KafkaUtil(kafka: Kafka) extends CirceSupport {
       recs.map(r => r.key() -> r.value())
     }
 
-  def autoClose[A <: AutoCloseable, B](autoCloseableFunc: A)(f: A ⇒ B): B = {
+  def autoClose[A <: AutoCloseable, B](autoCloseableFunc: A)(f: A ⇒ B): B =
     try {
       f(autoCloseableFunc)
     } finally {
       autoCloseableFunc.close()
     }
-  }
 
 }

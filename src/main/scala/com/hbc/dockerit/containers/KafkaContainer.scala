@@ -5,16 +5,16 @@ import java.util.Properties
 
 import com.hbc.dockerit.matchers.KafkaMatchers
 import com.hbc.dockerit.util.JavaUtils._
-import com.whisk.docker.{ContainerLink, DockerContainer, DockerKit, DockerReadyChecker}
+import com.whisk.docker.{ ContainerLink, DockerContainer, DockerKit, DockerReadyChecker }
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.admin.AdminClient
-import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig}
-import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
+import org.apache.kafka.clients.consumer.{ ConsumerConfig, KafkaConsumer }
+import org.apache.kafka.clients.producer.{ KafkaProducer, ProducerConfig }
+import org.apache.kafka.common.serialization.{ StringDeserializer, StringSerializer }
 import org.scalatest.Assertions
 import org.scalatest.concurrent.ScalaFutures
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 trait Kafka {
   def bootstrapServer: String
@@ -22,7 +22,9 @@ trait Kafka {
 
   def withAdminClient[A](f: AdminClient => A): A
   def withStringProducer[A](f: KafkaProducer[String, String] => A): A
-  def withStringConsumer[A](groupId: String, autoOffset: Option[String] = None)(f: KafkaConsumer[String, String] => A): A
+  def withStringConsumer[A](groupId: String, autoOffset: Option[String] = None)(
+    f: KafkaConsumer[String, String] => A
+  ): A
 
 }
 
@@ -32,18 +34,22 @@ trait KafkaContainer extends DockerKit with ScalaFutures with KafkaMatchers {
     lazy val bootstrapServer = s"${dockerExecutor.host}:$bootstrapMappedPort"
     lazy val zkServer        = s"${dockerExecutor.host}:$zkMappedPort"
 
-    def withAdminClient[A](f: AdminClient => A): A = autoClose(
-      AdminClient.create(adminClientProps())
-    )(f)
+    def withAdminClient[A](f: AdminClient => A): A =
+      autoClose(
+        AdminClient.create(adminClientProps())
+      )(f)
 
-    def withStringProducer[A](f: KafkaProducer[String, String] => A): A = autoClose (
+    def withStringProducer[A](f: KafkaProducer[String, String] => A): A =
+      autoClose(
         new KafkaProducer[String, String](stringProducerProps())
-    )(f)
+      )(f)
 
-    def withStringConsumer[A](groupId: String, autoOffset: Option[String] = None)
-                             (f: KafkaConsumer[String, String] => A): A = autoClose (
+    def withStringConsumer[A](groupId: String, autoOffset: Option[String] = None)(
+      f: KafkaConsumer[String, String] => A
+    ): A =
+      autoClose(
         new KafkaConsumer[String, String](stringConsumerProps(groupId, autoOffset))
-    )(f)
+      )(f)
   }
 
   private[this] val ZOOKEEPER_PORT = 2181
@@ -52,9 +58,10 @@ trait KafkaContainer extends DockerKit with ScalaFutures with KafkaMatchers {
   val zookeeperContainerName = s"zookeeper-${System.currentTimeMillis}"
   val kafkaContainerName     = s"kafka-${System.currentTimeMillis}"
 
-  lazy val zkContainer: DockerContainer = DockerContainer("zookeeper:3.5", name = Some(zookeeperContainerName))
-    .withPorts(ZOOKEEPER_PORT -> None)
-    .withReadyChecker(DockerReadyChecker.LogLineContains("binding to port /0.0.0.0"))
+  lazy val zkContainer: DockerContainer =
+    DockerContainer("zookeeper:3.5", name = Some(zookeeperContainerName))
+      .withPorts(ZOOKEEPER_PORT -> None)
+      .withReadyChecker(DockerReadyChecker.LogLineContains("binding to port /0.0.0.0"))
 
   /** Things to note:
     *  - we give the zk container above a name in advance so we can link it to this container
@@ -83,7 +90,10 @@ trait KafkaContainer extends DockerKit with ScalaFutures with KafkaMatchers {
     .futureValue
     .getOrElse(
       ZOOKEEPER_PORT,
-      Assertions.fail(s"Couldn't find mapping for port $ZOOKEEPER_PORT. (Found: ${kafkaContainer.getPorts()})"))
+      Assertions.fail(
+        s"Couldn't find mapping for port $ZOOKEEPER_PORT. (Found: ${kafkaContainer.getPorts()})"
+      )
+    )
 
   private[this] def newEphemeralPort(): Int =
     Try {
@@ -112,12 +122,22 @@ trait KafkaContainer extends DockerKit with ScalaFutures with KafkaMatchers {
     props
   }
 
-  private[this] def stringConsumerProps(groupId: String, offsetConfig: Option[String]): Properties = {
+  private[this] def stringConsumerProps(
+    groupId: String,
+    offsetConfig: Option[String]
+  ): Properties = {
     val props = new Properties()
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Kafka.bootstrapServer)
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer].getCanonicalName)
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer].getCanonicalName)
-    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetConfig.fold("earliest") { opt => opt
+    props.put(
+      ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+      classOf[StringDeserializer].getCanonicalName
+    )
+    props.put(
+      ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+      classOf[StringDeserializer].getCanonicalName
+    )
+    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetConfig.fold("earliest") { opt =>
+      opt
     })
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId)
     props

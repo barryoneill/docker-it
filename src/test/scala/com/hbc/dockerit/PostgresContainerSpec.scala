@@ -1,6 +1,6 @@
 package com.hbc.dockerit
 
-import java.sql.{DriverManager, Statement}
+import java.sql.{ DriverManager, Statement }
 
 import com.hbc.dockerit.containers.PostgresContainer
 import org.scalatest.WordSpec
@@ -11,9 +11,7 @@ class PostgresContainerSpec extends WordSpec with DockerSuite with PostgresConta
 
   "PostgresContainer" should {
 
-    def newConnection = DriverManager.getConnection(
-      Postgres.url, Postgres.user, Postgres.password)
-
+    def newConnection = DriverManager.getConnection(Postgres.url, Postgres.user, Postgres.password)
 
     def dbStatement(f: Statement => Unit): Unit = {
       val conn = newConnection
@@ -31,7 +29,7 @@ class PostgresContainerSpec extends WordSpec with DockerSuite with PostgresConta
       "is available" in {
         dbStatement(stmt => {
           val rs = stmt.executeQuery("select 1")
-          rs.next() should be(true)
+          rs.next()    should be(true)
           rs.getInt(1) should be(1)
         })
       }

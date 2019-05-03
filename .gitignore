@@ -1,3 +1,4 @@
+**/target/
 .idea
-target
-project/project
+*.DS_Store
+local.*

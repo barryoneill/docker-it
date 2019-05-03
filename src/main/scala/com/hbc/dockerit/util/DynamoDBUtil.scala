@@ -2,11 +2,11 @@ package com.hbc.dockerit.util
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException
-import com.hbc.dockerit.errors.{Error, DynamoDBError}
+import com.hbc.dockerit.errors.{ DynamoDBError, Error }
 import com.hbc.dockerit.model.dynamodb._
 
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 case class DynamoDBUtil(client: DynamoDB) {
 
@@ -20,7 +20,7 @@ case class DynamoDBUtil(client: DynamoDB) {
       case Failure(_) => false
     }
 
-  def tableExists(tableName: String): Either[Error, Boolean] = {
+  def tableExists(tableName: String): Either[Error, Boolean] =
     Try {
       client.getTable(tableName).describe()
     } match {
@@ -29,12 +29,12 @@ case class DynamoDBUtil(client: DynamoDB) {
         if (e.isInstanceOf[ResourceNotFoundException]) Right(false)
         else Left(DynamoDBError(cause = Some(e)))
     }
-  }
 
   def createTable(
-      tableName: String,
-      attributes: Seq[Attribute],
-      throughput: Provisioning.Throughput = DefaultProvisionedThroughput): Either[Error, Option[TableDescription]] = {
+    tableName: String,
+    attributes: Seq[Attribute],
+    throughput: Provisioning.Throughput = DefaultProvisionedThroughput
+  ): Either[Error, Option[TableDescription]] = {
 
     def validateAttributes: Option[Error] = {
       def countKeys(attributes: Seq[Attribute], K: KeyType): Int = attributes.count {
@@ -66,10 +66,10 @@ case class DynamoDBUtil(client: DynamoDB) {
           case Success(t) => Right(Some(TableDescription.fromAws(t)))
           case Failure(e) => Left(DynamoDBError(cause = Some(e)))
         }
-      }
+    }
   }
 
-  def deleteTable(tableName: String): Either[Error, Option[TableDescription]] = {
+  def deleteTable(tableName: String): Either[Error, Option[TableDescription]] =
     Try {
       val table        = client.getTable(tableName)
       val deleteResult = table.delete()
@@ -82,15 +82,13 @@ case class DynamoDBUtil(client: DynamoDB) {
         if (e.isInstanceOf[ResourceNotFoundException]) Right(None)
         else Left(DynamoDBError(cause = Some(e)))
     }
-  }
 
-  def getItemCount(tableName: String): Either[Error, Long] = {
+  def getItemCount(tableName: String): Either[Error, Long] =
     Try {
       client.getTable(tableName).describe()
     } match {
       case Success(desc) => Right(desc.getItemCount)
-      case Failure(e) => Left(DynamoDBError(cause = Some(e)))
+      case Failure(e)    => Left(DynamoDBError(cause = Some(e)))
     }
-  }
 
 }

@@ -3,27 +3,27 @@ sudo: false
 
 language: scala
 scala:
-  - 2.12.6
+  - 2.12.8
+
+jdk:
+  - openjdk8
+  - openjdk11
 
 services:
   - docker
 
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION fullCiBuild
+
 cache:
   directories:
-  - "$HOME/.ivy2/cache"
-  - "$HOME/.sbt"
+    - "$HOME/.coursier/cache"
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt"
 
 before_cache:
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
   - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
   - find $HOME/.ivy2/cache -name "*.lock" | xargs rm -rf
-
-script:
-   - sbt ++$TRAVIS_SCALA_VERSION fullCiBuild
-
-#deploy:
-#  - provider: script
-#    skip_cleanup: true
-#    script: sbt ++$TRAVIS_SCALA_VERSION publishAll
-#    on:
-#      tags: true
+  - find $HOME/.coursier/cache -name "*.lock" -type f -delete

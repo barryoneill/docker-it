@@ -6,5 +6,4 @@ import org.scalatest.Matchers
 trait PostgresMatchers extends Matchers {
   container: PostgresContainer =>
 
-
 }

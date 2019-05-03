@@ -15,19 +15,18 @@ trait DockerSuite extends DockerTestKit { this: Suite =>
      25 seconds on my macbook before all services are available and the 'Ready' log message appears */
   override val StartContainersTimeout: FiniteDuration = 60.seconds
 
-  override implicit val dockerFactory: DockerFactory =
+  implicit override val dockerFactory: DockerFactory =
     new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
 
   override def beforeAll(): Unit = {
 
-    if(dockerContainers.isEmpty) {
+    if (dockerContainers.isEmpty) {
       fail(s"To use ${getClass.getSimpleName}, you must implement at least one container trait")
     }
 
-
     log(s"            ----- containers starting ------    ")
-    dockerContainers.foreach {
-      dc => log(s" container '${dc.name.get}' starting with image '${dc.image}'..")
+    dockerContainers.foreach { dc =>
+      log(s" container '${dc.name.get}' starting with image '${dc.image}'..")
     }
 
     log(s" warning: may be slow, esp. if images have to be downloaded..")
@@ -36,24 +35,24 @@ trait DockerSuite extends DockerTestKit { this: Suite =>
 
     dockerContainers.foreach(c => {
       log(s"  - '${c.getName().futureValue}' ports (local => container): ")
-      c.getPorts().futureValue.foreach(mapping => {
-        log(s"       ${mapping._2} => ${mapping._1} " )
-      })
+      c.getPorts()
+        .futureValue
+        .foreach(mapping => {
+          log(s"       ${mapping._2} => ${mapping._1} ")
+        })
     })
 
     log(s"            ----- containers started ------    ")
 
   }
 
-  private[this] def log(msg: String){
-    println(s"  -- hbc-docker-it   $msg") // TODO: add logging framework
-  }
+  private[this] def log(msg: String): Unit =
+    println(s"  -- docker-it   $msg") // TODO: add logging framework
 
   override def afterAll(): Unit = {
     println("Shutting down containers.")
     super.afterAll()
 
   }
-
 
 }

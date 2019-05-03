@@ -5,7 +5,7 @@ import java.util.UUID
 import com.hbc.dockerit.containers.DynamoDBContainer
 import com.hbc.dockerit.model.dynamodb._
 import com.hbc.dockerit.util.DynamoDBUtil
-import org.scalatest.{Assertion, WordSpec}
+import org.scalatest.{ Assertion, WordSpec }
 import org.scalatest.exceptions.TestFailedException
 
 class DynamoDBContainerSpec extends WordSpec with DockerSuite with DynamoDBContainer {
@@ -26,19 +26,17 @@ class DynamoDBContainerSpec extends WordSpec with DockerSuite with DynamoDBConta
     "have utils" that {
 
       "create a table" in withTableName { table =>
-
         val createTableResult = dynamoDBUtil.createTable(
           tableName = table,
           attributes = Seq(
             Key(name = "id", dataType = StringDataType, PartitionKeyType)
           )
         )
-        createTableResult should be(Right(Some(TableDescription(name = table))))
+        createTableResult               should be(Right(Some(TableDescription(name = table))))
         dynamoDBUtil.tableExists(table) should be(Right(true))
       }
 
       "do not fail when creating a table that already exists" in withTableName { table =>
-
         val createTableResult = dynamoDBUtil.createTable(
           tableName = table,
           attributes = Seq(
@@ -46,7 +44,7 @@ class DynamoDBContainerSpec extends WordSpec with DockerSuite with DynamoDBConta
           )
         )
 
-        createTableResult should be(Right(Some(TableDescription(name = table))))
+        createTableResult               should be(Right(Some(TableDescription(name = table))))
         dynamoDBUtil.tableExists(table) should be(Right(true))
 
         // create table again
@@ -58,11 +56,10 @@ class DynamoDBContainerSpec extends WordSpec with DockerSuite with DynamoDBConta
         )
 
         createAlreadyExistingTableResult should be(Right(None))
-        dynamoDBUtil.tableExists(table) should be(Right(true))
+        dynamoDBUtil.tableExists(table)  should be(Right(true))
       }
 
       "delete a table" in withTableName { tableName =>
-
         val createTableResult = dynamoDBUtil.createTable(
           tableName = tableName,
           attributes = Seq(
@@ -70,11 +67,11 @@ class DynamoDBContainerSpec extends WordSpec with DockerSuite with DynamoDBConta
           )
         )
 
-        createTableResult should be(Right(Some(TableDescription(name = tableName))))
+        createTableResult                   should be(Right(Some(TableDescription(name = tableName))))
         dynamoDBUtil.tableExists(tableName) should be(Right(true))
 
         val deleteTableResult = dynamoDBUtil.deleteTable(tableName)
-        deleteTableResult should be(Right(Some(TableDescription(name = tableName))))
+        deleteTableResult                   should be(Right(Some(TableDescription(name = tableName))))
         dynamoDBUtil.tableExists(tableName) should be(Right(false))
       }
 
@@ -89,11 +86,12 @@ class DynamoDBContainerSpec extends WordSpec with DockerSuite with DynamoDBConta
   "have dynamodb matchers" that {
 
     "verify that a table exists" in withTableName { tableName =>
-
       val NoExistName = "non-existent-table"
 
-      dynamoDBUtil.createTable(tableName = tableName,
-                               attributes = Seq(Key(name = "id", dataType = StringDataType, PartitionKeyType)))
+      dynamoDBUtil.createTable(
+        tableName = tableName,
+        attributes = Seq(Key(name = "id", dataType = StringDataType, PartitionKeyType))
+      )
 
       dynamoDB should haveTable(tableName)
       dynamoDB should not(haveTable(NoExistName))
@@ -109,9 +107,10 @@ class DynamoDBContainerSpec extends WordSpec with DockerSuite with DynamoDBConta
     }
 
     "verify that a new table has empty count" in withTableName { tableName =>
-
-      dynamoDBUtil.createTable(tableName = tableName,
-                               attributes = Seq(Key(name = "id", dataType = StringDataType, PartitionKeyType)))
+      dynamoDBUtil.createTable(
+        tableName = tableName,
+        attributes = Seq(Key(name = "id", dataType = StringDataType, PartitionKeyType))
+      )
 
       dynamoDB should haveItemCount(tableName, 0)
       dynamoDB should not(haveItemCount(tableName, 1))

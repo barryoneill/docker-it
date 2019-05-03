@@ -22,9 +22,9 @@ class KafkaContainerSpec extends WordSpec with DockerSuite with KafkaContainer {
         val topics = Range(1, 4).map(a => s"util-test-$a-${UUID.randomUUID()}")
 
         val topicsBefore = kafkaUtil.listTopics()
-        kafkaUtil.createTopics(topics :_*)
+        kafkaUtil.createTopics(topics: _*)
 
-        kafkaUtil.listTopics() should contain theSameElementsAs(topicsBefore ++ topics)
+        kafkaUtil.listTopics() should contain theSameElementsAs (topicsBefore ++ topics)
 
       }
 
@@ -39,11 +39,15 @@ class KafkaContainerSpec extends WordSpec with DockerSuite with KafkaContainer {
         val rec1 = BankAccount("1234-RICH-GUY", 99999.99)
         val rec2 = BankAccount("1234-POOR-GUY", 00000.01)
 
-        kafkaUtil.putRecordsJSON[BankAccount](topicName, Seq(rec1, rec2), acc => s"${acc.accountNumber}-${acc.amount}")
+        kafkaUtil.putRecordsJSON[BankAccount](
+          topicName,
+          Seq(rec1, rec2),
+          acc => s"${acc.accountNumber}-${acc.amount}"
+        )
 
         val fetched = kafkaUtil.pollRecordsJSON[BankAccount](s"group-$testId", topicName)
 
-        fetched should equal(List(("1234-RICH-GUY-99999.99", rec1),("1234-POOR-GUY-0.01", rec2)))
+        fetched should equal(List(("1234-RICH-GUY-99999.99", rec1), ("1234-POOR-GUY-0.01", rec2)))
 
       }
 

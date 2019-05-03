@@ -5,9 +5,9 @@ import scala.concurrent.duration._
 
 object TwitterFutureOps {
 
-  import com.twitter.util.{Future => TFuture}
+  import com.twitter.util.{ Future => TFuture }
 
-  import scala.concurrent.{Promise, Future => SFuture}
+  import scala.concurrent.{ Promise, Future => SFuture }
 
   implicit class TwitterFutureOps[T](val f: TFuture[T]) extends AnyVal {
     def asScala: SFuture[T] = {
@@ -16,9 +16,8 @@ object TwitterFutureOps {
       promise.future
     }
 
-    def result(timeoutSecs: Int = 5): T = {
+    def result(timeoutSecs: Int = 5): T =
       Await.result(f.asScala, timeoutSecs.seconds)
-    }
   }
 
 }
