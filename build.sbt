@@ -1,4 +1,4 @@
-val `scala 212` = "2.12.8"
+val `scala 212` = "2.12.10"
 
 val scalacOpts = Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
@@ -41,16 +41,16 @@ val scalacOpts = Seq(
 )
 
 val V = new {
-  val awsSdk          = "1.11.545"
-  val circe           = "0.11.1"
-  val dockerTestKit   = "0.9.8"
+  val awsSdk          = "1.11.642"
+  val circe           = "0.12.1"
+  val dockerTestKit   = "0.9.9"
   val postgresql      = "42.2.5"
-  val scalatest       = "3.0.7"
-  val localstackUtils = "0.1.19"
-  val finagleRedis    = "19.4.0"
-  val postgreSQL      = "42.2.5"
-  val kafka           = "2.2.0"
-  val log4j           = "1.7.26"
+  val scalatest       = "3.0.8"
+  val localstackUtils = "0.1.22"
+  val finagleRedis    = "19.9.0"
+  val postgreSQL      = "42.2.8"
+  val kafka           = "2.2.1"
+  val log4j           = "1.7.28"
 }
 
 lazy val appDependencies = Seq(
